@@ -1,17 +1,19 @@
 package com.cubieline.plana.activity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 import com.cubieline.plana.R;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends BaseActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +49,7 @@ public class MainActivity extends ActionBarActivity {
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
-	public static class PlaceholderFragment extends Fragment {
+	public static class PlaceholderFragment extends Fragment implements OnClickListener{
 
 		public PlaceholderFragment() {
 		}
@@ -57,7 +59,24 @@ public class MainActivity extends ActionBarActivity {
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_main, container,
 					false);
+			
+			rootView.findViewById(R.id.start_btn).setOnClickListener(this);
 			return rootView;
+		}
+		
+		@Override
+		public void onClick(View view) {
+			
+			switch(view.getId()){
+			default : return;
+			
+			case R.id.start_btn :
+				Activity activity = getActivity();
+				Intent intent = new Intent(activity, CameraActivity.class);
+				activity.startActivityForResult(intent, 0);
+				break;
+			}
+			
 		}
 	}
 
