@@ -4,8 +4,10 @@
 package com.cubieline.plana.activity;
 
 import java.io.IOException;
+import java.util.List;
 
 import android.app.Activity;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -14,29 +16,34 @@ import android.media.MediaRecorder.OnInfoListener;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
+import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
 import com.cubieline.plana.R;
+import com.cubieline.plana.common.CameraHelper;
 import com.cubieline.plana.utils.ExternalStorageUtils;
-import com.cubieline.plana.view.VideoPreview;
 
 /**
  * @author LeiGuoting
  *
  */
-public class CameraActivity extends BaseActivity implements OnClickListener{
+public class CameraActivity extends BaseActivity implements OnClickListener, TextureView.SurfaceTextureListener{
 	
 	private static final String TAG = CameraActivity.class.getSimpleName();
 	
 	private Camera camera;
 	
-	private VideoPreview preview;
+	//private VideoPreview preview;
+	
+	private TextureView preview;
 	
 	private Button actionBtn;
 	
 	private MediaRecorder recorder;
+	
+	private boolean isRecording = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,18 +53,55 @@ public class CameraActivity extends BaseActivity implements OnClickListener{
 		setContentView(R.layout.activity_preview_for_camera);
 		actionBtn = (Button)findViewById(R.id.action_btn);
 		actionBtn.setOnClickListener(this);
-		actionBtn.setSelected(false);
+		isRecording = false;
 		
-		preview = (VideoPreview) findViewById(R.id.camera_preview);
+		preview = (TextureView) findViewById(R.id.camera_preview);
+		preview.setSurfaceTextureListener(this);
+		/*
 		int numberOfCameras = Camera.getNumberOfCameras();
 		if(0 < numberOfCameras){
 			if(safeCameraOpen(0)){
 				preview.setCamera(camera);				
 			}
 		}
+		*/
+		
+		/*
+		camera = CameraHelper.getDefaultCameraInstance();
+		int cameraId = 0;
+		setCameraDisplayOrientation(this, cameraId, camera);
+
+        // We need to make sure that our preview and recording video size are supported by the
+        // camera. Query camera to find all the sizes and choose the optimal size given the
+        // dimensions of our preview surface.
+        Camera.Parameters parameters = camera.getParameters();
+        List<Camera.Size> mSupportedPreviewSizes = parameters.getSupportedPreviewSizes();
+        Camera.Size optimalSize = CameraHelper.getOptimalPreviewSize(mSupportedPreviewSizes,preview.getWidth(), preview.getHeight());
+
+        // Use the same size for recording profile.
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        profile.videoFrameWidth = optimalSize.width;
+        profile.videoFrameHeight = optimalSize.height;
+
+        // likewise for the camera object itself.
+        parameters.setPreviewSize(profile.videoFrameWidth, profile.videoFrameHeight);
+        camera.setParameters(parameters);
+        try {
+                // Requires API level 11+, For backward compatibility use {@link setPreviewDisplay}
+                // with {@link SurfaceView}
+        	camera.setPreviewTexture(preview.getSurfaceTexture());
+        	camera.startPreview();
+        } catch (IOException e) {
+            Log.e(TAG, "Surface texture is unavailable or unsuitable" + e.getMessage());
+        }
+        // END_INCLUDE (configure_preview)
+        
+        */
 	}
 	
-	
+	private void setCaptureButtonText(String title) {
+		actionBtn.setText(title);
+    }
 	
 	private boolean safeCameraOpen(int cameraId) {
 	    boolean qOpened = false;
@@ -74,7 +118,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener{
 	        Log.e(getString(R.string.app_name), "failed to open Camera", e);
 	    }
 
-	    return qOpened;    
+	    return qOpened;
 	}
 	
 	private void setCameraDisplayOrientation(Activity activity, int cameraId, android.hardware.Camera camera) {
@@ -100,7 +144,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener{
 	 }
 	
 	private void releaseCameraAndPreview() {
-		preview.setCamera(null);
+		//preview.setCamera(null);
 	    if (camera != null) {
 	    	camera.release();
 	    	camera = null;
@@ -114,6 +158,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener{
 		default : return;
 		
 		case R.id.action_btn:
+			/*
 			boolean isSelected = actionBtn.isSelected();
 			if(isSelected){
 				actionBtn.setSelected(false);
@@ -124,8 +169,147 @@ public class CameraActivity extends BaseActivity implements OnClickListener{
 				actionBtn.setText(R.string.stop);
 				capturingVideos();
 			}
+			*/
+			if (isRecording) {
+				// stop recording and release camera
+				recorder.stop();  // stop the recording
+	            releaseMediaRecorder(); // release the MediaRecorder object
+	            camera.lock();         // take camera access back from MediaRecorder
+
+	            // inform the user that recording has stopped
+	            setCaptureButtonText("Capture");
+	            isRecording = false;
+	            releaseCamera();
+
+			}
+			
+			else{
+				// BEGIN_INCLUDE (configure_media_recorder)
+				recorder = new MediaRecorder();
+
+		        // Step 1: Unlock and set camera to MediaRecorder
+				camera.unlock();
+		        recorder.setCamera(camera);
+
+		        // Step 2: Set sources
+		        recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT );
+		        recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+
+		        /*
+		        Camera.Parameters parameters = camera.getParameters();
+		        List<Camera.Size> mSupportedPreviewSizes = parameters.getSupportedPreviewSizes();
+		        Camera.Size optimalSize = CameraHelper.getOptimalPreviewSize(mSupportedPreviewSizes,preview.getWidth(), preview.getHeight());
+
+		        // Use the same size for recording profile.
+		        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+		        profile.videoFrameWidth = optimalSize.width;
+		        profile.videoFrameHeight = optimalSize.height;
+		        */
+		        // Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
+		        if(null != profile){
+		        	recorder.setProfile(profile);	
+		        }
+
+		        // Step 4: Set output file
+		        String rootPath = ExternalStorageUtils.getExternalStorageDirectory(ExternalStorageUtils.DIRECTORY_CACHE).getAbsolutePath();
+				String filePath = new StringBuilder(rootPath).append("/").append(System.currentTimeMillis()).append(".mp4").toString();
+				recorder.setOutputFile(filePath);
+				//recorder.setOutputFile(CameraHelper.getOutputMediaFile(CameraHelper.MEDIA_TYPE_VIDEO).toString());
+		        // END_INCLUDE (configure_media_recorder)
+
+		        // Step 5: Prepare configured MediaRecorder
+		        try {
+		        	recorder.prepare();
+		        } catch (IllegalStateException e) {
+		            Log.d(TAG, "IllegalStateException preparing MediaRecorder: " + e.getMessage());
+		            releaseMediaRecorder();
+		            return ;
+		        } catch (IOException e) {
+		            Log.d(TAG, "IOException preparing MediaRecorder: " + e.getMessage());
+		            releaseMediaRecorder();
+		            return ;
+		        }
+		        
+		        recorder.start();
+		        isRecording = true;
+		        setCaptureButtonText("Stop");
+			}
 			break;
 		}
+	}
+	
+	 private void releaseMediaRecorder(){
+	        if (recorder != null) {
+	            // clear recorder configuration
+	        	recorder.reset();
+	            // release the recorder object
+	        	recorder.release();
+	        	recorder = null;
+	            // Lock camera for later use i.e taking it back from MediaRecorder.
+	            // MediaRecorder doesn't need it anymore and we will release it if the activity pauses.
+	        	camera.lock();
+	        }
+	    }
+
+	    private void releaseCamera(){
+	        if (camera != null){
+	            // release the camera for other applications
+	        	camera.release();
+	        	camera = null;
+	        }
+	    }
+	
+	    
+	private CamcorderProfile profile;
+	
+	@Override
+	public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+		camera = CameraHelper.getDefaultCameraInstance();
+		int cameraId = 0;
+		setCameraDisplayOrientation(this, cameraId, camera);
+
+        // We need to make sure that our preview and recording video size are supported by the
+        // camera. Query camera to find all the sizes and choose the optimal size given the
+        // dimensions of our preview surface.
+        Camera.Parameters parameters = camera.getParameters();
+        List<Camera.Size> mSupportedPreviewSizes = parameters.getSupportedPreviewSizes();
+        Camera.Size optimalSize = CameraHelper.getOptimalPreviewSize(mSupportedPreviewSizes,preview.getWidth(), preview.getHeight());
+
+        // Use the same size for recording profile.
+        profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        profile.videoFrameWidth = optimalSize.width;
+        profile.videoFrameHeight = optimalSize.height;
+
+        // likewise for the camera object itself.
+        parameters.setPreviewSize(profile.videoFrameWidth, profile.videoFrameHeight);
+        camera.setParameters(parameters);
+        try {
+                // Requires API level 11+, For backward compatibility use {@link setPreviewDisplay}
+                // with {@link SurfaceView}
+        	camera.setPreviewTexture(surface);
+        	camera.startPreview();
+        } catch (IOException e) {
+            Log.e(TAG, "Surface texture is unavailable or unsuitable" + e.getMessage());
+        }
+        // END_INCLUDE (configure_preview)
+	}
+	
+	@Override
+	public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	@Override
+	public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	private void stopVideos(){
