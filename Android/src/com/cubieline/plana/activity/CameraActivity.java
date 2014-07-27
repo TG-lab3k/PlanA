@@ -13,6 +13,7 @@ import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
@@ -103,6 +104,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
 		actionBtn.setText(title);
     }
 	
+	@SuppressWarnings("unused")
 	private boolean safeCameraOpen(int cameraId) {
 	    boolean qOpened = false;
 	  
@@ -184,55 +186,70 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
 			}
 			
 			else{
-				// BEGIN_INCLUDE (configure_media_recorder)
-				recorder = new MediaRecorder();
+				AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
+					@Override
+					protected Void doInBackground(Void... params) {
+						// BEGIN_INCLUDE (configure_media_recorder)
+						recorder = new MediaRecorder();
 
-		        // Step 1: Unlock and set camera to MediaRecorder
-				camera.unlock();
-		        recorder.setCamera(camera);
+				        // Step 1: Unlock and set camera to MediaRecorder
+						camera.unlock();
+				        recorder.setCamera(camera);
 
-		        // Step 2: Set sources
-		        recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT );
-		        recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+				        // Step 2: Set sources
+				        recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+				        recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+						
+						//recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+						//recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+						//recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264); 
 
-		        /*
-		        Camera.Parameters parameters = camera.getParameters();
-		        List<Camera.Size> mSupportedPreviewSizes = parameters.getSupportedPreviewSizes();
-		        Camera.Size optimalSize = CameraHelper.getOptimalPreviewSize(mSupportedPreviewSizes,preview.getWidth(), preview.getHeight());
+				        /*
+				        Camera.Parameters parameters = camera.getParameters();
+				        List<Camera.Size> mSupportedPreviewSizes = parameters.getSupportedPreviewSizes();
+				        Camera.Size optimalSize = CameraHelper.getOptimalPreviewSize(mSupportedPreviewSizes,preview.getWidth(), preview.getHeight());
 
-		        // Use the same size for recording profile.
-		        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
-		        profile.videoFrameWidth = optimalSize.width;
-		        profile.videoFrameHeight = optimalSize.height;
-		        */
-		        // Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
-		        if(null != profile){
-		        	recorder.setProfile(profile);	
-		        }
+				        // Use the same size for recording profile.
+				        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+				        profile.videoFrameWidth = optimalSize.width;
+				        profile.videoFrameHeight = optimalSize.height;
+				        */
+				        // Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
+				        if(null != profile){
+				        	recorder.setProfile(profile);	
+				        }
+				        
+				        // Step 4: Set output file
+				        String rootPath = ExternalStorageUtils.getExternalStorageDirectory(ExternalStorageUtils.DIRECTORY_CACHE).getAbsolutePath();
+						String filePath = new StringBuilder(rootPath).append("/").append(System.currentTimeMillis()).append(".mp4").toString();
+						recorder.setOutputFile(filePath);
+						//recorder.setOutputFile(CameraHelper.getOutputMediaFile(CameraHelper.MEDIA_TYPE_VIDEO).toString());
+				        // END_INCLUDE (configure_media_recorder)
 
-		        // Step 4: Set output file
-		        String rootPath = ExternalStorageUtils.getExternalStorageDirectory(ExternalStorageUtils.DIRECTORY_CACHE).getAbsolutePath();
-				String filePath = new StringBuilder(rootPath).append("/").append(System.currentTimeMillis()).append(".mp4").toString();
-				recorder.setOutputFile(filePath);
-				//recorder.setOutputFile(CameraHelper.getOutputMediaFile(CameraHelper.MEDIA_TYPE_VIDEO).toString());
-		        // END_INCLUDE (configure_media_recorder)
-
-		        // Step 5: Prepare configured MediaRecorder
-		        try {
-		        	recorder.prepare();
-		        } catch (IllegalStateException e) {
-		            Log.d(TAG, "IllegalStateException preparing MediaRecorder: " + e.getMessage());
-		            releaseMediaRecorder();
-		            return ;
-		        } catch (IOException e) {
-		            Log.d(TAG, "IOException preparing MediaRecorder: " + e.getMessage());
-		            releaseMediaRecorder();
-		            return ;
-		        }
-		        
-		        recorder.start();
-		        isRecording = true;
-		        setCaptureButtonText("Stop");
+				        // Step 5: Prepare configured MediaRecorder
+				        try {
+				        	recorder.prepare();
+				        } catch (IllegalStateException e) {
+				            Log.d(TAG, "IllegalStateException preparing MediaRecorder: " + e.getMessage());
+				            releaseMediaRecorder();
+				            return null;
+				        } catch (IOException e) {
+				            Log.d(TAG, "IOException preparing MediaRecorder: " + e.getMessage());
+				            releaseMediaRecorder();
+				            return null;
+				        }
+				        
+				        recorder.start();
+				        isRecording = true;
+						return null;
+					}
+					
+					@Override
+					protected void onPostExecute(Void result) {
+						setCaptureButtonText("Stop");
+					}
+				};
+				task.execute();
 			}
 			break;
 		}
@@ -280,6 +297,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
         profile.videoFrameWidth = optimalSize.width;
         profile.videoFrameHeight = optimalSize.height;
 
+        
         // likewise for the camera object itself.
         parameters.setPreviewSize(profile.videoFrameWidth, profile.videoFrameHeight);
         camera.setParameters(parameters);
@@ -312,6 +330,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
 		
 	}
 	
+	@SuppressWarnings("unused")
 	private void stopVideos(){
 		if(null == recorder){
 			return;
@@ -327,6 +346,8 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
 		finish();
 	}
 	
+	
+	@SuppressWarnings("unused")
 	private void capturingVideos(){
 		//camera.unlock();
 		recorder = new MediaRecorder();
