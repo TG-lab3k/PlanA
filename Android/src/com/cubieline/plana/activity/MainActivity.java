@@ -2,6 +2,7 @@ package com.cubieline.plana.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.cubieline.plana.R;
 
@@ -50,10 +52,9 @@ public class MainActivity extends BaseActivity {
 	 * A placeholder fragment containing a simple view.
 	 */
 	public static class PlaceholderFragment extends Fragment implements OnClickListener{
-
-		public PlaceholderFragment() {
-		}
-
+		
+		private TextView resultTxtv;
+		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class MainActivity extends BaseActivity {
 					false);
 			
 			rootView.findViewById(R.id.start_btn).setOnClickListener(this);
+			resultTxtv = (TextView)rootView.findViewById(R.id.result_txtv);
 			return rootView;
 		}
 		
@@ -73,7 +75,34 @@ public class MainActivity extends BaseActivity {
 			case R.id.start_btn :
 				Activity activity = getActivity();
 				Intent intent = new Intent(activity, CameraActivity.class);
-				activity.startActivityForResult(intent, 0);
+				activity.startActivityForResult(intent, REQUEST_CAPTURE_VIDEO);
+				break;
+				
+			case R.id.result_txtv :
+				activity = getActivity();
+				intent = new Intent(activity, CameraActivity.class);
+				String path = resultTxtv.getText().toString();
+				Uri uri = Uri.parse(path);
+				intent.setData(uri);
+				activity.startActivityForResult(intent, REQUEST_CAPTURE_VIDEO);
+				break;
+			}
+			
+		}
+		
+		@Override
+		public void onActivityResult(int requestCode, int resultCode,
+				Intent data) {
+			
+			switch(requestCode){
+			default : super.onActivityResult(requestCode, resultCode, data); 
+				break;
+				
+			case REQUEST_CAPTURE_VIDEO :
+				if(RESULT_OK == resultCode){
+					Uri path = data.getData();
+					resultTxtv.setText(path.toString());
+				}
 				break;
 			}
 			
