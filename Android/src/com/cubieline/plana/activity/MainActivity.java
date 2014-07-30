@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import com.cubieline.plana.R;
 
 public class MainActivity extends BaseActivity {
+	
+	private static final String TAG = MainActivity.class.getSimpleName();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +26,9 @@ public class MainActivity extends BaseActivity {
 		setContentView(R.layout.activity_main);
 
 		if (savedInstanceState == null) {
+			PlaceholderFragment frag = new PlaceholderFragment();
 			getSupportFragmentManager().beginTransaction()
-					.add(R.id.container, new PlaceholderFragment()).commit();
+					.add(R.id.container, frag).commit();
 		}
 	}
 
@@ -47,6 +51,12 @@ public class MainActivity extends BaseActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode,Intent data) {
+		Log.d(TAG, "@Activity.onActivityResult ______ ||| _____");
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 
 	/**
 	 * A placeholder fragment containing a simple view.
@@ -63,6 +73,7 @@ public class MainActivity extends BaseActivity {
 			
 			rootView.findViewById(R.id.start_btn).setOnClickListener(this);
 			resultTxtv = (TextView)rootView.findViewById(R.id.result_txtv);
+			resultTxtv.setOnClickListener(this);
 			return rootView;
 		}
 		
@@ -75,16 +86,16 @@ public class MainActivity extends BaseActivity {
 			case R.id.start_btn :
 				Activity activity = getActivity();
 				Intent intent = new Intent(activity, CameraActivity.class);
-				activity.startActivityForResult(intent, REQUEST_CAPTURE_VIDEO);
+				startActivityForResult(intent, REQUEST_CAPTURE_VIDEO);
 				break;
 				
 			case R.id.result_txtv :
 				activity = getActivity();
-				intent = new Intent(activity, CameraActivity.class);
+				intent = new Intent(activity, PlayerActivity.class);
 				String path = resultTxtv.getText().toString();
 				Uri uri = Uri.parse(path);
 				intent.setData(uri);
-				activity.startActivityForResult(intent, REQUEST_CAPTURE_VIDEO);
+				startActivityForResult(intent, REQUEST_PLAY_VIDEO);
 				break;
 			}
 			
@@ -93,6 +104,7 @@ public class MainActivity extends BaseActivity {
 		@Override
 		public void onActivityResult(int requestCode, int resultCode,
 				Intent data) {
+			Log.d(TAG, "@Fragment.onActivityResult ______");
 			
 			switch(requestCode){
 			default : super.onActivityResult(requestCode, resultCode, data); 
@@ -101,6 +113,7 @@ public class MainActivity extends BaseActivity {
 			case REQUEST_CAPTURE_VIDEO :
 				if(RESULT_OK == resultCode){
 					Uri path = data.getData();
+					Log.d(TAG, " >> uri:" + path.toString());
 					resultTxtv.setText(path.toString());
 				}
 				break;

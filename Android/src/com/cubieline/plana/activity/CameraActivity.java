@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,6 +47,10 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
 	private MediaRecorder recorder;
 	
 	private boolean isRecording = false;
+	
+	private boolean isRecorded;
+	
+	private String filePath;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -182,7 +188,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
 	            setCaptureButtonText("Capture");
 	            isRecording = false;
 	            releaseCamera();
-
+	            isRecorded = true;
 			}
 			
 			else{
@@ -221,7 +227,7 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
 				        
 				        // Step 4: Set output file
 				        String rootPath = ExternalStorageUtils.getExternalStorageDirectory(ExternalStorageUtils.DIRECTORY_CACHE).getAbsolutePath();
-						String filePath = new StringBuilder(rootPath).append("/").append(System.currentTimeMillis()).append(".mp4").toString();
+						filePath = new StringBuilder(rootPath).append("/").append(System.currentTimeMillis()).append(".mp4").toString();
 						recorder.setOutputFile(filePath);
 						//recorder.setOutputFile(CameraHelper.getOutputMediaFile(CameraHelper.MEDIA_TYPE_VIDEO).toString());
 				        // END_INCLUDE (configure_media_recorder)
@@ -395,5 +401,19 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
 	protected void onStop() {
 		releaseCameraAndPreview();
 		super.onStop();
+	}
+	
+	@Override
+	public void onBackPressed() {
+		if(isRecorded){
+			Intent intent = new Intent();
+			intent.setData(Uri.parse(filePath));
+			setResult(RESULT_OK, intent);
+			finish();
+		}
+		
+		else{
+			super.onBackPressed();
+		}
 	}
 }

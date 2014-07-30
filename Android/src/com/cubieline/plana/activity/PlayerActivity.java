@@ -37,6 +37,7 @@ public class PlayerActivity extends BaseActivity implements TextureView.SurfaceT
 		setContentView(R.layout.activity_display_item);
 		textureView = (TextureView)findViewById(R.id.display_textureView);
 		textView = (TextView)findViewById(R.id.display_uri_txtv);
+		textView.setText(source);
 		textureView.setSurfaceTextureListener(this);
 	}
 	
@@ -58,7 +59,7 @@ public class PlayerActivity extends BaseActivity implements TextureView.SurfaceT
 			mediaPlayer.setDataSource(source);
 		} catch (IllegalArgumentException | SecurityException
 				| IllegalStateException | IOException e) {
-			e.printStackTrace();
+			Log.e(TAG, "", e);
 		}
 		
 		mediaPlayer.setSurface(face);
