@@ -62,6 +62,17 @@ public class PlayerActivity extends BaseActivity implements TextureView.SurfaceT
 			Log.e(TAG, "", e);
 		}
 		
+		/*
+		int rotation = getWindowManager().getDefaultDisplay().getRotation();
+		float degrees = 0f;
+		 switch (rotation) {
+         case Surface.ROTATION_0: degrees = 0f; break;
+         case Surface.ROTATION_90: degrees = 90f; break;
+         case Surface.ROTATION_180: degrees = 180f; break;
+         case Surface.ROTATION_270: degrees = 270f; break;
+		 }
+		 */
+		textureView.setRotation(90.0f);
 		mediaPlayer.setSurface(face);
 		mediaPlayer.prepareAsync();
 	}
