@@ -299,7 +299,10 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
         Camera.Size optimalSize = CameraHelper.getOptimalPreviewSize(mSupportedPreviewSizes,preview.getWidth(), preview.getHeight());
 
         // Use the same size for recording profile.
-        profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        profile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
+        profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
+        profile.audioCodec = MediaRecorder.AudioEncoder.AMR_NB;
+        profile.videoCodec = MediaRecorder.VideoEncoder.H264;
         profile.videoFrameWidth = optimalSize.width;
         profile.videoFrameHeight = optimalSize.height;
 
