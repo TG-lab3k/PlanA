@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
@@ -310,6 +311,13 @@ public class CameraActivity extends BaseActivity implements OnClickListener, Tex
         // likewise for the camera object itself.
         parameters.setPreviewSize(profile.videoFrameWidth, profile.videoFrameHeight);
         camera.setParameters(parameters);
+        camera.setPreviewCallbackWithBuffer(new PreviewCallback(){
+        	@Override
+        	public void onPreviewFrame(byte[] buffer, Camera camera) {
+        		
+        	}
+        });
+        
         try {
                 // Requires API level 11+, For backward compatibility use {@link setPreviewDisplay}
                 // with {@link SurfaceView}

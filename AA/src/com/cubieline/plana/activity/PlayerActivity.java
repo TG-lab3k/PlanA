@@ -57,9 +57,14 @@ public class PlayerActivity extends BaseActivity implements TextureView.SurfaceT
 		Log.d(TAG, "@onSurfaceTextureAvailable source[" + source + "]");
 		try {
 			mediaPlayer.setDataSource(source);
-		} catch (IllegalArgumentException | SecurityException
-				| IllegalStateException | IOException e) {
-			Log.e(TAG, "", e);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
 		/*
