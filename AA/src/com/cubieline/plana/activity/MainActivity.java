@@ -1,14 +1,13 @@
 package com.cubieline.plana.activity;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -27,8 +26,7 @@ public class MainActivity extends BaseActivity {
 
 		if (savedInstanceState == null) {
 			PlaceholderFragment frag = new PlaceholderFragment();
-			getSupportFragmentManager().beginTransaction()
-					.add(R.id.container, frag).commit();
+			getFragmentManager().beginTransaction().add(R.id.container, frag).commit();
 		}
 	}
 
@@ -40,18 +38,6 @@ public class MainActivity extends BaseActivity {
 		return true;
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
-	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode,Intent data) {
 		Log.d(TAG, "@Activity.onActivityResult ______ ||| _____");

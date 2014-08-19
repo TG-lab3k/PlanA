@@ -4,10 +4,10 @@
 package com.cubieline.plana.view;
 
 import android.content.Context;
+import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.hardware.Camera;
 
 /**
  * @author LeiGuoting

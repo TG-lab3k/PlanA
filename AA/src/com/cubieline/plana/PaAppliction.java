@@ -3,12 +3,12 @@
  */
 package com.cubieline.plana;
 
-import com.cubieline.plana.utils.ExternalStorageUtils;
-
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
+
+import com.cubieline.plana.utils.ExternalStorageUtils;
 
 /**
  * @author LeiGuoting
