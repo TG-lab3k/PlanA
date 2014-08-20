@@ -1,6 +1,6 @@
 export NDK=/Applications/adt-bundle-mac-x86_64/android-ndk-r10
-export PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64
-export PLATFORM=$NDK/platforms/android-19/arch-arm/
+export PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64
+export PLATFORM=$NDK/platforms/android-L/arch-arm/
 export PATH=$PATH:$PREBUILT/bin
 export TMPDIR=/workspace/dev/PlanA/AA/jni/FFmpeg/temp
 
