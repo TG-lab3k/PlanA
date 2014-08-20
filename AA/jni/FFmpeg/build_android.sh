@@ -49,6 +49,6 @@ make install
 }
 
 CPU=arm
-PREFIX=$(pwd)/android/$CPU 
+PREFIX=$(pwd)/android/$CPU
 ADDI_CFLAGS="-marm"
 build_one
