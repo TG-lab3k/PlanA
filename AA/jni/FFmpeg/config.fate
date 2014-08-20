@@ -1,0 +1,1 @@
+config:arm:::linux:Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn):--target-os=linux --arch=arm --enable-version3 --enable-gpl --enable-nonfree --disable-stripping --disable-ffmpeg --disable-ffplay --disable-ffserver --disable-ffprobe --disable-encoders --disable-muxers --disable-devices --disable-protocols --enable-protocol=file --enable-avfilter --disable-network
